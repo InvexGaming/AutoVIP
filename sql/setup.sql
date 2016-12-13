@@ -5,23 +5,6 @@ DROP DATABASE IF EXISTS autovip;
 CREATE DATABASE autovip;
 
 USE autovip;
-
-/*
-* Package Table, contains VIP packages
-*/
-DROP TABLE IF EXISTS packages;
-CREATE TABLE packages
-(
-  id INT NOT NULL AUTO_INCREMENT,
-  name VARCHAR(64),
-  credits_included INT DEFAULT 0,
-  num_servers INT NOT NULL, -- Set to -1 for all servers
-  duration INT NOT NULL,  -- in days, 0 for permanent
-  description VARCHAR(255),
-  active BIT(1) NOT NULL,
-  PRIMARY KEY (id)
-);
-
 /*
 * Lists all servers
 */
@@ -30,7 +13,7 @@ CREATE TABLE servers
 (
   id INT NOT NULL AUTO_INCREMENT,
   name VARCHAR(64), -- name of server (nice name)
-  PRIMARY KEY(id)
+  PRIMARY KEY (id)
 );
 
 /*
@@ -41,29 +24,56 @@ CREATE TABLE permissions
 (
   id INT NOT NULL AUTO_INCREMENT,
   tag VARCHAR(32), -- referring to groups in admin_groups.cfg, includes @ symbol
-  PRIMARY KEY(id)
+  PRIMARY KEY (id)
 );
 
 /*
-* Transaction table, stores all transaction details etc
+* Package Table, contains VIP packages
+*/
+DROP TABLE IF EXISTS packages;
+CREATE TABLE packages
+(
+  id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(64),
+  description VARCHAR(255),
+  cost DECIMAL(13, 4) NOT NULL,
+  credits_included INT DEFAULT 0, -- per quantity/month
+  num_servers INT NOT NULL, -- 0 for all servers, -1 for not applicable
+  duration INT NOT NULL,  -- in days, 0 for permanent
+  active BIT(1) NOT NULL, -- inactive packages not added to admin_simple.ini file
+  permissionid INT,
+  FOREIGN KEY (permissionid) REFERENCES permissions(id),
+  PRIMARY KEY (id)
+);
+
+/*
+* transactions, stores checkout, payment information
 */
 DROP TABLE IF EXISTS transactions;
 CREATE TABLE transactions
 (
   id INT NOT NULL AUTO_INCREMENT,
-  cartid INT NOT NULL,
-  steamid VARCHAR(32),
+  cost DECIMAL(13, 4) NOT NULL, -- cumulative/total amount paid in transaction
+  steamid VARCHAR(32), -- prefixed STEAM_1:Y:Z
   username VARCHAR(64),
   userid INT,
-  start_date INT(11),
-  end_date INT(11),
-  permanent BIT(1) NOT NULL DEFAULT 0, -- must be checked alongside end_date
+  start_date INT(11) NOT NULL,
+  end_date INT(11), -- NULL if permanent
   packageid INT,
-  serverid INT,
-  permissionid INT,
   PRIMARY KEY(id),
-  FOREIGN KEY (packageid) REFERENCES packages(id),
-  FOREIGN KEY (serverid) REFERENCES servers(id),
-  FOREIGN KEY (permissionid) REFERENCES permissions(id)
+  FOREIGN KEY (packageid) REFERENCES packages(id)
 );
 
+/*
+* Selected Servers, 1 or more chosen by user for particular transaction
+* Only exists/needed if package.num_servers > 0 in transaction
+*/
+DROP TABLE IF EXISTS selectedservers;
+CREATE TABLE selectedservers
+(
+  transactionid INT,
+  serverid INT,
+  PRIMARY KEY (transactionid, serverid),
+  FOREIGN KEY (transactionid) REFERENCES transactions(id),
+  FOREIGN KEY (serverid) REFERENCES servers(id)
+)
