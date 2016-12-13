@@ -2,7 +2,9 @@
 -- Warning: This will remove all current entries! Backup first.
 
 DROP DATABASE IF EXISTS autovip;
-CREATE DATABASE IF NOT EXISTS autovip;
+CREATE DATABASE autovip;
+
+USE autovip;
 
 /*
 * Package Table, contains VIP packages
@@ -18,7 +20,7 @@ CREATE TABLE packages
   description VARCHAR(255),
   active BIT(1) NOT NULL,
   PRIMARY KEY (id)
-)
+);
 
 /*
 * Lists all servers
@@ -53,11 +55,15 @@ CREATE TABLE transactions
   steamid VARCHAR(32),
   username VARCHAR(64),
   userid INT,
-  start_date INT(11)
+  start_date INT(11),
   end_date INT(11),
   permanent BIT(1) NOT NULL DEFAULT 0, -- must be checked alongside end_date
   packageid INT,
   serverid INT,
   permissionid INT,
+  PRIMARY KEY(id),
+  FOREIGN KEY (packageid) REFERENCES packages(id),
+  FOREIGN KEY (serverid) REFERENCES servers(id),
+  FOREIGN KEY (permissionid) REFERENCES permissions(id)
 );
 
