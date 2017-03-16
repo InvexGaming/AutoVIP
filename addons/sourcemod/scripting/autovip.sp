@@ -2,7 +2,7 @@
 #include <cstrike>
 
 //Defines
-#define VERSION "1.00"
+#define VERSION "1.01"
 
 //Global Varibales
 int ServerID = -1;
@@ -72,13 +72,15 @@ public Action OnReloadVIP(int client, int args)
   char query[1024];
   Format(query, sizeof(query), "SELECT p.name, p.description, perm.tag, t.steamid, t.username, t.userid, t.id FROM packages p INNER JOIN transactions t on p.id = t.packageid INNER JOIN permissions perm on p.permissionid = perm.id LEFT JOIN selectedservers ss on t.id = ss.transactionid WHERE p.permissionid IS NOT NULL AND p.active = (1) AND (end_date IS NULL OR UNIX_TIMESTAMP() < t.end_date) AND (ss.serverid = %d OR p.num_servers = 0) ORDER BY p.ordernum,t.id ASC", ServerID);
   
-  SQL_TQuery(db, DB_Callback_Command_ReadVIPList, query);
+  SQL_TQuery(db, DB_Callback_Command_ReadVIPList, query, client);
   delete db;
+  
+  ReplyToCommand(client, "[AUTOVIP] VIP cache has been refreshed.");
   
   return Plugin_Handled;
 }
 
-public void DB_Callback_Command_ReadVIPList(Handle owner, Handle hndl, const char[] error, any datapack)
+public void DB_Callback_Command_ReadVIPList(Handle owner, Handle hndl, const char[] error, int client)
 {
   if (hndl == null) {
     LogError("Error reading AutoVIP database at Command_ReadVIPList: %s", error);
