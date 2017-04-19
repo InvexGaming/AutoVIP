@@ -63,7 +63,7 @@ public Action OnReloadVIP(int client, int args)
     db = SQL_Connect("autovip", true, error, sizeof(error));
     
     if (db == null) {
-      LogError("Failed to connec to database: %s", error);
+      LogError("Failed to connect to database: %s", error);
       return Plugin_Handled;
     }
   }
