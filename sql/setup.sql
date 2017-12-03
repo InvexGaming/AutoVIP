@@ -43,6 +43,7 @@ CREATE TABLE packages
   num_servers INT NOT NULL, -- 0 for all servers, -1 for not applicable
   duration INT NOT NULL,  -- in days, 0 for permanent
   active BIT(1) NOT NULL, -- inactive packages not added to admin_simple.ini file
+  purchasable BIT(1) NOT NULL, -- which packages are available to be purchased
   permissionid INT,
   ordernum INT DEFAULT 99999, -- used to determine which order packages are displayed
   FOREIGN KEY (permissionid) REFERENCES permissions(id),
