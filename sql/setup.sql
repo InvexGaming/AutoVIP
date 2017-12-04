@@ -39,7 +39,7 @@ CREATE TABLE packages
   name VARCHAR(64),
   description VARCHAR(255),
   cost DECIMAL(13, 4) NOT NULL,
-  credits_included INT DEFAULT 0, -- per quantity/month
+  credits_included INT DEFAULT 0, -- per quantity/total
   num_servers INT NOT NULL, -- 0 for all servers, -1 for not applicable
   duration INT NOT NULL,  -- in days, 0 for permanent
   active BIT(1) NOT NULL, -- inactive packages not added to admin_simple.ini file
